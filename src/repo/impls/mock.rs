@@ -48,7 +48,9 @@ impl AccountRepo for MockAccountRepoImpl {
     async fn get_login_by_username(&self, username: &str) -> RepoResult<Option<dto::repo::Login>> {
         let state = self.lock_state().await;
 
-        if let Some(username_entity) = state.usernames.get(username) {
+        if let Some(username_entity) = state.usernames.get(username)
+            && username_entity.expires_at.is_none()
+        {
             Ok(Some(dto::repo::Login {
                 id: username_entity.account_id,
                 password_hash: state.accounts[&username_entity.account_id]

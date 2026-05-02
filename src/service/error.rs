@@ -14,6 +14,12 @@ pub enum ServiceError {
     #[error("email taken")]
     EmailTaken,
 
+    #[error("account not found")]
+    AccountNotFound,
+
+    #[error("invalid credentials")]
+    InvalidCredentials,
+
     #[error("unexcepted error: {0}")]
     UnexceptedError(&'static str),
 }

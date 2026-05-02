@@ -1,3 +1,5 @@
+use super::repo;
+
 /// Account entity returned to user after authentication.
 pub struct Account {
     /// Unique user id.
@@ -21,4 +23,14 @@ pub struct Keys {
     pub identity_key: Vec<u8>,
     pub encrypted_private_key: Vec<u8>,
     pub encrypted_master_key: Vec<u8>,
+}
+
+impl From<repo::Keys> for Keys {
+    fn from(value: repo::Keys) -> Self {
+        Self {
+            identity_key: value.identity_key,
+            encrypted_private_key: value.encrypted_private_key,
+            encrypted_master_key: value.encrypted_master_key,
+        }
+    }
 }

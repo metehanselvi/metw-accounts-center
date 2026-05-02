@@ -15,6 +15,9 @@ pub mod service;
 /// Data transfer objects.
 pub mod dto;
 
+/// Miscellaneous utilites.
+pub mod util;
+
 mod snowflake;
 
 pub use snowflake::{EPOCH, snowflake};

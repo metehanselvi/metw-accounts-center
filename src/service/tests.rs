@@ -1,5 +1,5 @@
 use super::*;
-use crate::repo::impls::MockAccountRepoImpl;
+use crate::{dto, repo::impls::MockAccountRepoImpl, util::check_password};
 
 #[tokio::test(flavor = "multi_thread")]
 async fn account_creation_mock_mt() -> ServiceResult<()> {
@@ -26,15 +26,27 @@ async fn account_creation_mock_mt() -> ServiceResult<()> {
 
     let user2_account_id = account_service.signup(signup_dto).await?;
 
+    let user2_account_id_login = account_service
+        .login_with_username(dto::request::LoginWithUsername {
+            username: "user2".to_string(),
+            password_hash: "paswd2".to_string(),
+        })
+        .await?;
+
     let repo = account_service.repo;
+
+    assert!(user2_account_id_login == user2_account_id);
 
     assert!(repo.get_primary_username(user1_account_id).await?.unwrap() == "user1");
     assert!(
-        repo.get_login_by_username("user1")
-            .await?
-            .unwrap()
-            .password_hash
-            == "paswd1"
+        check_password(
+            "paswd1".to_string(),
+            repo.get_login_by_username("user1")
+                .await?
+                .unwrap()
+                .password_hash
+        )
+        .await
     );
     assert!(
         repo.get_login_by_email("user1@example.com")
