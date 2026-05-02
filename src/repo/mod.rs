@@ -1,62 +1,93 @@
 use crate::{dto, entity};
 use async_trait::async_trait;
 
-/// Persistent account storage.
+mod error;
+
+/// Mock repository implementation.
+pub mod mock;
+
+pub use error::RepoError;
+
+/// Repository result type.
+pub type RepoResult<T> = Result<T, RepoError>;
+
+/// Transactional repository access wrapper.
 #[async_trait]
 pub trait AccountRepo {
+    /// Begin a new transactional unit.
+    async fn begin(&self) -> Box<dyn AccountRepoTransaction>;
+}
+
+/// Persistent account storage.
+#[async_trait]
+pub trait AccountRepoTransaction {
+    /// Commit the changes.
+    async fn commit(self: Box<Self>) -> RepoResult<()>;
+
     /// Register a new account, or update its keys.
-    async fn upsert_account(&self, id: entity::AccountId, password_hash: &str, keys: &dto::repo::Keys);
+    async fn upsert_account(
+        &mut self,
+        id: entity::AccountId,
+        password_hash: &str,
+        keys: &dto::repo::Keys,
+    ) -> RepoResult<()>;
 
     /// Get password by email.
     ///
     /// Returns Argon2-hashed password with account id. Higher layers shall do
     /// hash verifications.
-    async fn get_login_by_email(&self, email: &str) -> Option<dto::repo::Login>;
+    async fn get_login_by_email(&mut self, email: &str) -> RepoResult<Option<dto::repo::Login>>;
 
     /// Get password by username.
     ///
     /// The behavior is exactly the same with `get_login_by_email`.
-    async fn get_login_by_username(&self, username: &str) -> Option<dto::repo::Login>;
+    async fn get_login_by_username(
+        &mut self,
+        username: &str,
+    ) -> RepoResult<Option<dto::repo::Login>>;
 
     /// Get primary username if, exists.
     ///
     /// Usually all the accounts have primary usernames, but pending deletion
     /// might drop usernames of an account.
-    async fn get_primary_username(&self, id: entity::AccountId) -> Option<String>;
+    async fn get_primary_username(&mut self, id: entity::AccountId) -> RepoResult<Option<String>>;
 
     /// Get usernames by account id.
     ///
     /// After username change, previous usernames for will continue to belong
     /// the account for a while; but they will be garbage collected.
-    async fn get_nonexpiring_username_aliases(&self, id: entity::AccountId) -> Vec<String>;
+    async fn get_nonexpiring_username_aliases(
+        &mut self,
+        id: entity::AccountId,
+    ) -> RepoResult<Vec<String>>;
 
     /// Get primary email if, exists.
     ///
     /// All regular accounts shall have primary mail, but some system accounts
     /// or deleted accounts do not.
-    async fn get_primary_email(&self, id: entity::AccountId) -> Option<String>;
+    async fn get_primary_email(&mut self, id: entity::AccountId) -> RepoResult<Option<String>>;
 
     /// Get secondary by account id.
     ///
     /// List of secondary emails if user add.
-    async fn get_secondary_emails(&self, id: entity::AccountId) -> Vec<String>;
+    async fn get_secondary_emails(&mut self, id: entity::AccountId) -> RepoResult<Vec<String>>;
 
     /// Get account keys - the key bundle of the account.
-    async fn get_keys(&self, id: entity::AccountId) -> Option<dto::repo::Keys>;
+    async fn get_keys(&mut self, id: entity::AccountId) -> RepoResult<Option<dto::repo::Keys>>;
 
     /// Add a secondary email to the account. Returns true if the operation
     /// succeed.
-    async fn add_email(&self, id: entity::AccountId, email: &str) -> bool;
+    async fn add_email(&mut self, id: entity::AccountId, email: &str) -> RepoResult<bool>;
 
     /// Add username alias to the account. Returns true if the operation
     /// succeed.
-    async fn add_username(&self, id: entity::AccountId, username: &str) -> bool;
+    async fn add_username(&mut self, id: entity::AccountId, username: &str) -> RepoResult<bool>;
 
     /// Set the email primary for the account.
-    async fn set_primary_email(&self, id: entity::AccountId, email: &str) -> bool;
+    async fn set_primary_email(&mut self, email: &str, is_primary: bool) -> RepoResult<bool>;
 
     /// Set the username primary for the account.
-    async fn set_primary_username(&self, id: entity::AccountId, username: &str) -> bool;
+    async fn set_primary_username(&mut self, username: &str, is_primary: bool) -> RepoResult<bool>;
 }
 
 /// Token provider holds data temporarily.

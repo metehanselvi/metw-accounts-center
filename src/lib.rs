@@ -6,8 +6,11 @@
 /// Database entities.
 pub mod entity;
 
-/// Persistent storage.
+/// Application storage.
 pub mod repo;
+
+/// Application state.
+pub mod service;
 
 /// Data transfer objects.
 pub mod dto;

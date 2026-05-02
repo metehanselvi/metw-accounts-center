@@ -1,3 +1,5 @@
+use crate::entity::AccountId;
+
 pub struct Keys {
     pub identity_key: Vec<u8>,
     pub encrypted_private_key: Vec<u8>,
@@ -5,6 +7,6 @@ pub struct Keys {
 }
 
 pub struct Login {
-    pub id: i64,
-    pub password_hash: String
+    pub id: AccountId,
+    pub password_hash: String,
 }

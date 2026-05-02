@@ -4,13 +4,13 @@ use sqlx::{
 };
 
 /// Account id
-#[derive(FromRow)]
+#[derive(FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub struct AccountId(pub i64);
 
 /// Account entity.
 ///
 /// This type mainly used for storing cryptographic primitives.
-#[derive(FromRow)]
+#[derive(FromRow, Default)]
 pub struct Account {
     /// Account id generated using Twitter's snowflake algorithm.
     pub id: AccountId,
@@ -29,7 +29,7 @@ pub struct Account {
 }
 
 /// Usernames or username aliases assigned to an account.
-#[derive(FromRow)]
+#[derive(FromRow, Default)]
 pub struct Username {
     /// Username.
     pub username: String,
@@ -48,7 +48,7 @@ pub struct Username {
 }
 
 /// Verified email of an account.
-#[derive(FromRow)]
+#[derive(FromRow, Default)]
 pub struct Email {
     /// Email.
     pub email: String,

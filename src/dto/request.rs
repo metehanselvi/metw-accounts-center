@@ -9,7 +9,8 @@ lazy_static! {
 
 /// Sign up a new account.
 #[derive(Validate)]
-pub struct SignUp {
+#[cfg_attr(test, derive(Clone))]
+pub struct Signup {
     /// Username.
     #[validate(length(min = 2, max = 20), regex(path = *USERNAME_REGEX))]
     pub username: String,
@@ -63,6 +64,7 @@ pub struct KeyRoll {
 
 /// Account's criptographic keys.
 #[derive(Validate)]
+#[cfg_attr(test, derive(Clone))]
 pub struct Keys {
     /// Curve25519 public key in der format.
     #[validate(length(max = 2048))]
