@@ -17,4 +17,4 @@ pub mod dto;
 
 mod snowflake;
 
-pub use snowflake::{snowflake, EPOCH};
+pub use snowflake::{EPOCH, snowflake};

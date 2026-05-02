@@ -12,10 +12,20 @@ lazy_static! {
     ).and_utc().timestamp_millis() as u64;
 }
 
-static LAST_OVERFLOW: Mutex<i64> = Mutex::new(0);
+#[cfg(test)]
+static INCREMENT_MAX: i64 = 2i64.pow(4);
+#[cfg(not(test))]
 static INCREMENT_MAX: i64 = 2i64.pow(12);
 
-static INCREMENT: Mutex<i64> = Mutex::new(0);
+struct SnowflakeState {
+    last_overflow: i64,
+    increment: i64,
+}
+
+static STATE: Mutex<SnowflakeState> = Mutex::new(SnowflakeState {
+    last_overflow: 0,
+    increment: 0,
+});
 
 /// UUID generator inspired from Twitter's snowflake format.
 ///
@@ -30,25 +40,26 @@ pub fn snowflake() -> i64 {
     // Ensure the time is not yet May 15 2109 07:35:11
     assert!(timestamp < 2i64.pow(42) - 1);
 
-    let mut increment = INCREMENT.lock().unwrap();
-    let mut last_overflow = LAST_OVERFLOW.lock().unwrap();
+    let mut state = STATE.lock().unwrap();
 
-    if *increment == 0 {
-        *last_overflow = timestamp;
+    if state.last_overflow == timestamp {
+        drop(state);
+
+        std::thread::sleep(Duration::from_millis(1));
+        return snowflake();
     }
 
-    *increment += 1;
-
-    if *increment == INCREMENT_MAX {
-        *increment = 0;
-
-        if *last_overflow == timestamp {
-            std::thread::sleep(Duration::from_millis(1));
-            return snowflake();
-        }
+    if state.increment == 0 {
+        state.last_overflow = timestamp;
     }
 
-    (timestamp << 22) | *increment
+    state.increment += 1;
+
+    if state.increment == INCREMENT_MAX {
+        state.increment = 0;
+    }
+
+    (timestamp << 22) | state.increment
 }
 
 #[cfg(test)]
@@ -57,7 +68,7 @@ pub fn snowflake() -> i64 {
 fn test_snowflake() {
     use std::collections::HashSet;
 
-    let cap = 2usize.pow(16);
+    let cap = 2usize.pow(12);
     let mut snowflakes = HashSet::with_capacity(cap);
 
     for _ in 0..cap {
