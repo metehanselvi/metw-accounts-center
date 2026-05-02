@@ -18,6 +18,9 @@ pub mod dto;
 /// Miscellaneous utilites.
 pub mod util;
 
+/// Authentication: JWT & token scopes.
+pub mod token;
+
 mod snowflake;
 
 pub use snowflake::{EPOCH, snowflake};

@@ -20,6 +20,12 @@ pub enum ServiceError {
     #[error("invalid credentials")]
     InvalidCredentials,
 
+    #[error("invalid jwt")]
+    InvalidJwt,
+
+    #[error("token revoked")]
+    TokenRevoked,
+
     #[error("unexcepted error: {0}")]
     UnexceptedError(&'static str),
 }

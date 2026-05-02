@@ -1,0 +1,47 @@
+use crate::entity;
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
+
+/// Authentication token with authorization scopes.
+#[derive(Serialize, Deserialize)]
+pub struct Token {
+    /// Account id.
+    pub id: entity::AccountId,
+    /// Token's persmissions.
+    pub scopes: Vec<TokenScope>,
+
+    pub(crate) exp: usize,
+    nbf: usize,
+    iat: usize,
+}
+
+/// Authorization scopes.
+#[derive(Serialize, Deserialize)]
+pub enum TokenScope {
+    /// Permit adding the email to the account.
+    AddEmail(String),
+    /// Permit logins.
+    Authenticate,
+    /// Allow changing aaccount's primary email address to given address.
+    SetPrimaryEmail(String),
+    /// Enable account. This scope is present in email sent in signup
+    /// procedure.
+    EnableAccount,
+}
+
+impl Token {
+    /// Create a new token.
+    pub fn new(id: entity::AccountId, scopes: Vec<TokenScope>, valid_for: Duration) -> Self {
+        let iat = Utc::now().timestamp_millis() as usize;
+        let exp = iat + (valid_for.as_millis() as usize);
+
+        Token {
+            id,
+            scopes,
+            exp,
+            nbf: iat - 10000,
+            iat,
+        }
+    }
+}

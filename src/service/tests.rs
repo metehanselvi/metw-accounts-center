@@ -1,4 +1,4 @@
-use super::*;
+use super::{AccountService, ServiceResult};
 use crate::{dto, repo::impls::MockAccountRepoImpl, util::check_password};
 
 #[tokio::test(flavor = "multi_thread")]

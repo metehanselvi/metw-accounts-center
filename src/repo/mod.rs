@@ -11,7 +11,7 @@ pub use error::RepoError;
 /// Repository result type.
 pub type RepoResult<T> = Result<T, RepoError>;
 
-/// Transactional repository access wrapper.
+/// Persistent account storage.
 #[async_trait]
 pub trait AccountRepo {
     /// Begin a new transactional unit.
@@ -58,7 +58,7 @@ pub trait AccountRepo {
     async fn get_keys(&self, id: entity::AccountId) -> RepoResult<Option<dto::repo::Keys>>;
 }
 
-/// Persistent account storage.
+/// Transactional repository access wrapper.
 #[async_trait]
 pub trait AccountRepoTransaction {
     /// Commit the changes.
@@ -89,4 +89,11 @@ pub trait AccountRepoTransaction {
 
 /// Token provider holds data temporarily.
 #[async_trait]
-pub trait TokenRepo {}
+pub trait TokenRepo {
+    /// Revoke the token with provided fingerprint. Keep the fingerprint for
+    /// at least `revoke_for` time.
+    async fn revoke(&self, fingerprint: &[u8], revoke_for: std::time::Duration) -> RepoResult<()>;
+
+    /// Returns true if the token has been revoked.
+    async fn check_revocation(&self, fingerprint: &[u8]) -> RepoResult<bool>;
+}

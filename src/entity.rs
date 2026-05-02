@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
 /// Account id
-#[derive(FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub struct AccountId(pub i64);
 
 /// Account entity.

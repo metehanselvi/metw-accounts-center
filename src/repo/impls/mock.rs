@@ -1,14 +1,17 @@
-use super::super::{AccountRepo, AccountRepoTransaction, RepoResult};
+use super::super::{AccountRepo, AccountRepoTransaction, RepoResult, TokenRepo};
 use crate::{dto, entity};
 use async_trait::async_trait;
 use chrono::Utc;
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
 use tokio::sync::{Mutex, MutexGuard, OwnedMutexGuard};
 
-/// Mock account repository implementatoin
+/// Mock account repository implementation
 #[derive(Default)]
 pub struct MockAccountRepoImpl {
-    state: Arc<Mutex<State>>,
+    state: Arc<Mutex<AccountRepoState>>,
 }
 
 impl MockAccountRepoImpl {
@@ -17,7 +20,7 @@ impl MockAccountRepoImpl {
         Box::new(Self::default())
     }
 
-    async fn lock_state(&self) -> MutexGuard<'_, State> {
+    async fn lock_state(&self) -> MutexGuard<'_, AccountRepoState> {
         self.state.lock().await
     }
 }
@@ -133,14 +136,14 @@ impl AccountRepo for MockAccountRepoImpl {
 }
 
 #[derive(Default)]
-struct State {
+struct AccountRepoState {
     accounts: HashMap<entity::AccountId, entity::Account>,
     emails: HashMap<String, entity::Email>,
     usernames: HashMap<String, entity::Username>,
 }
 
 struct MockAccountRepoTransactionImpl {
-    state: OwnedMutexGuard<State>,
+    state: OwnedMutexGuard<AccountRepoState>,
 }
 
 #[async_trait]
@@ -222,5 +225,31 @@ impl AccountRepoTransaction for MockAccountRepoTransactionImpl {
         } else {
             Ok(false)
         }
+    }
+}
+
+/// Mock token repo implementation.
+#[derive(Default)]
+pub struct MockTokenRepoImpl {
+    revocations: Mutex<HashSet<Vec<u8>>>,
+}
+
+impl MockTokenRepoImpl {
+    /// Create a new mock repository.
+    pub fn boxed_new() -> Box<Self> {
+        Box::new(Self::default())
+    }
+}
+
+#[async_trait]
+impl TokenRepo for MockTokenRepoImpl {
+    async fn revoke(&self, fingerprint: &[u8], _revoke_for: std::time::Duration) -> RepoResult<()> {
+        self.revocations.lock().await.insert(fingerprint.into());
+
+        Ok(())
+    }
+
+    async fn check_revocation(&self, fingerprint: &[u8]) -> RepoResult<bool> {
+        Ok(self.revocations.lock().await.contains(fingerprint))
     }
 }
