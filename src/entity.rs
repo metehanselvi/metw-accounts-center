@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
 /// Account id
-#[derive(Serialize, Deserialize, FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub struct AccountId(pub i64);
 
 impl std::fmt::Display for AccountId {
@@ -15,7 +15,7 @@ impl std::fmt::Display for AccountId {
 /// Account entity.
 ///
 /// This type mainly used for storing cryptographic primitives.
-#[derive(FromRow, Default)]
+#[derive(Debug, FromRow, Default)]
 pub struct Account {
     /// Account id generated using Twitter's snowflake algorithm.
     pub id: AccountId,
@@ -34,7 +34,7 @@ pub struct Account {
 }
 
 /// Account flags entity.
-#[derive(FromRow, Clone)]
+#[derive(Debug, FromRow, Clone)]
 pub struct AccountFlags {
     /// Accounts associated with the flags entity.
     pub id: AccountId,
@@ -44,7 +44,7 @@ pub struct AccountFlags {
 }
 
 /// Usernames or username aliases assigned to an account.
-#[derive(FromRow, Default)]
+#[derive(Debug, FromRow, Default)]
 pub struct Username {
     /// Username.
     pub username: String,
@@ -63,7 +63,7 @@ pub struct Username {
 }
 
 /// Verified email of an account.
-#[derive(FromRow, Default)]
+#[derive(Debug, FromRow, Default)]
 pub struct Email {
     /// Email.
     pub email: String,

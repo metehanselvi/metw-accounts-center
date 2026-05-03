@@ -15,7 +15,7 @@ async fn account_creation_mock_mt() -> ServiceResult<()> {
     let account_service = AccountService::new(repo);
 
     // This basic sign up request will be used for all accounts.
-    let mut signup_dto = dto::request::Signup {
+    let signup_dto = dto::request::Signup {
         username: "user1".to_string(),
         email: "user1@example.com".to_string(),
         password_hash: "paswd1".to_string(),
@@ -28,16 +28,19 @@ async fn account_creation_mock_mt() -> ServiceResult<()> {
 
     let user1_account_id = account_service.signup(signup_dto.clone()).await?;
 
-    signup_dto.username = "user2".to_string();
-    signup_dto.email = "user2@example.com".to_string();
-    signup_dto.password_hash = "paswd2".to_string();
+    let mut signup_dto2 = signup_dto.clone();
+    signup_dto2.username = "user2".to_string();
+    signup_dto2.email = "user2@example.com".to_string();
+    signup_dto2.password_hash = "paswd2".to_string();
 
-    let user2_account_id = account_service.signup(signup_dto.clone()).await?;
+    let user2_account_id = account_service.signup(signup_dto2.clone()).await?;
 
     // Try to register an account with already-taken username.
+    let mut already_taken_username = signup_dto.clone();
+    already_taken_username.email = "...".to_string();
     assert!(matches!(
-        account_service.signup(signup_dto).await,
-        Err(..) // ServiceError::UsernameTaken
+        account_service.signup(already_taken_username).await,
+        Err(ServiceError::UsernameTaken)
     ));
 
     // Try to log into user2 account, but it is not verified.
@@ -103,6 +106,14 @@ async fn account_creation_mock_mt() -> ServiceResult<()> {
     transaction.commit().await?;
 
     let account_service = AccountService::new(repo);
+
+    // Try to register an account with already-taken email.
+    let mut already_taken_email = signup_dto.clone();
+    already_taken_email.username = "...".to_string();
+    assert!(matches!(
+        account_service.signup(already_taken_email).await,
+        Err(ServiceError::EmailTaken)
+    ));
 
     // Log into user1 account.
     let user1_account_id_login = account_service

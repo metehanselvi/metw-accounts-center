@@ -75,6 +75,22 @@ pub trait AccountRepo: Send + Sync {
         current_primary_email: &str,
         new_primary_email: &str,
     ) -> RepoResult<()>;
+
+    /// Remove the email if it is not primary mail of the account.
+    async fn remove_email_if_not_primary(
+        &self,
+        id: entity::AccountId,
+        email: &str,
+    ) -> RepoResult<()>;
+
+    /// Returns true if the username has been taken.
+    async fn is_username_taken(&self, username: &str) -> RepoResult<bool>;
+
+    /// Returns true if the email has been taken.
+    async fn is_email_taken(&self, email: &str) -> RepoResult<bool>;
+
+    /// Returns true if the email has been taken by the given account.
+    async fn is_email_taken_by(&self, id: entity::AccountId, email: &str) -> RepoResult<bool>;
 }
 
 /// Transactional repository access wrapper.

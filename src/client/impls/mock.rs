@@ -30,7 +30,7 @@ impl MailClient for MockMailClientImpl {
         let body = template.body();
 
         // TODO: use trancing instead
-        println!("--- EMAIL TO: {id} ---\nSub:{subject}\n\n{body}\n----------------------");
+        println!("--- EMAIL TO: {id} ---\nSub: {subject}\n\n{body}\n----------------------");
 
         debug.entry(id).or_default().push(template);
     }

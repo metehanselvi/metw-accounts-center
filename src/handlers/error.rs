@@ -7,4 +7,7 @@ use thiserror::Error;
 pub enum HandlerError {
     #[error("{0}")]
     Service(#[from] ServiceError),
+
+    #[error("unexcepted error: {0}")]
+    UnexceptedError(&'static str),
 }

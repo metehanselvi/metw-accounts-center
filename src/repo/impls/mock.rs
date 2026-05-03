@@ -159,17 +159,18 @@ impl AccountRepo for MockAccountRepoImpl {
             let current_primary_email_entity = state
                 .emails
                 .get(current_primary_email)
-                .ok_or(RepoError::Internal("mail not found"))?;
+                .ok_or(RepoError::Internal("invalid current primary email"))?;
             let new_primary_email_entity = state
                 .emails
                 .get(new_primary_email)
-                .ok_or(RepoError::Internal("mail not found"))?;
+                .ok_or(RepoError::Internal("new mail not found"))?;
 
             if !(current_primary_email_entity.is_primary
                 && current_primary_email_entity.account_id == id
-                && new_primary_email_entity.account_id == id)
+                && new_primary_email_entity.account_id == id
+                && new_primary_email != current_primary_email)
             {
-                return Err(RepoError::Internal("invalid email"));
+                return Err(RepoError::Internal("cannot change the primary mail"));
             }
         }
 
@@ -181,6 +182,51 @@ impl AccountRepo for MockAccountRepoImpl {
         state.emails.get_mut(new_primary_email).unwrap().is_primary = true;
 
         Ok(())
+    }
+
+    async fn remove_email_if_not_primary(
+        &self,
+        id: entity::AccountId,
+        email: &str,
+    ) -> RepoResult<()> {
+        let mut state = self.lock_state().await;
+
+        let email_entity = state
+            .emails
+            .get(email)
+            .ok_or(RepoError::Internal("email not found"))?;
+
+        if email_entity.account_id == id && !email_entity.is_primary {
+            state.emails.remove(email);
+            Ok(())
+        } else {
+            Err(RepoError::Internal(
+                "email does not belong to the account, or it is a primary email",
+            ))
+        }
+    }
+
+    async fn is_username_taken(&self, username: &str) -> RepoResult<bool> {
+        let state = self.lock_state().await;
+
+        Ok(state.usernames.contains_key(username))
+    }
+
+    async fn is_email_taken(&self, email: &str) -> RepoResult<bool> {
+        let state = self.lock_state().await;
+
+        Ok(state.emails.contains_key(email))
+    }
+
+    async fn is_email_taken_by(&self, id: entity::AccountId, email: &str) -> RepoResult<bool> {
+        let state = self.lock_state().await;
+
+        let email_entity = state
+            .emails
+            .get(email)
+            .ok_or(RepoError::Internal("email not found"))?;
+
+        Ok(email_entity.account_id == id)
     }
 }
 

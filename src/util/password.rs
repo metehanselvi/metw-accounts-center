@@ -6,9 +6,7 @@ use argon2::{
 /// Argon2-hashed password.
 pub async fn check(password: String, hash: String) -> bool {
     tokio::task::spawn_blocking(move || {
-        let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&hash) {
-            parsed_hash
-        } else {
+        let Ok(parsed_hash) = PasswordHash::new(&hash) else {
             return false;
         };
 

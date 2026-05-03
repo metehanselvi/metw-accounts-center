@@ -1,10 +1,11 @@
 use super::HandlerResult;
 use crate::{
-    client::MailClient,
-    dto, entity,
-    service::{AccountService, TokenService},
+    client::MailClient, dto, entity, handlers::HandlerError, service::{AccountService, ServiceError, TokenService}, token::{Token, TokenScope}, util::templated_mails
 };
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
+
+static ADD_EMAIL_TOKEN_VALID_FOR: Duration = Duration::from_secs(60 * 60);
+static SET_PRIMARY_MAIL_VALID_FOR: Duration = Duration::from_secs(60 * 10);
 
 /// Account handlers that does not require escalated privileges.
 ///
@@ -15,26 +16,107 @@ use std::sync::Arc;
 /// [`TokenScope::Authenticate`]: crate::token::TokenScope::Authenticate
 pub struct PersonalHandler {
     account_service: Arc<AccountService>,
-    _token_service: Arc<TokenService>,
-    _email_client: Arc<dyn MailClient>,
+    token_service: Arc<TokenService>,
+    email_client: Arc<dyn MailClient>,
+    email_callback_url: &'static str,
 }
 
 impl PersonalHandler {
     /// Creates a new account hander.
     pub fn new(
         account_service: Arc<AccountService>,
-        _token_service: Arc<TokenService>,
-        _email_client: Arc<dyn MailClient>,
+        token_service: Arc<TokenService>,
+        email_client: Arc<dyn MailClient>,
+        email_callback_url: &'static str,
     ) -> Self {
         Self {
             account_service,
-            _token_service,
-            _email_client,
+            token_service,
+            email_client,
+            email_callback_url,
         }
     }
 
     /// GET `/me`
     pub async fn me(&self, id: entity::AccountId) -> HandlerResult<dto::response::Account> {
         Ok(self.account_service.me(id).await?)
+    }
+
+    /// POST `/me/emails`
+    ///
+    /// Add a new email to the account. Sends verification code to requested
+    /// email.
+    pub async fn add_email(&self, id: entity::AccountId, email: String) -> HandlerResult<()> {
+        if self.account_service.is_email_taken(email.clone()).await? {
+            return Err(ServiceError::EmailTaken)?;
+        }
+
+        let add_email_jwt = self.token_service.sign(&Token::new(
+            id,
+            vec![TokenScope::AddEmail(email.clone())],
+            ADD_EMAIL_TOKEN_VALID_FOR,
+        ));
+
+        let template = templated_mails::Template::AddEmail {
+            email,
+            add_email_jwt,
+            callback_url: self.email_callback_url,
+        };
+
+        self.email_client.send(id, template).await;
+
+        Ok(())
+    }
+
+    /// DELETE `/me/emails/<email>`
+    ///
+    /// Remove the email if it is not primary email.
+    pub async fn delete_email(&self, id: entity::AccountId, email: String) -> HandlerResult<()> {
+        self.account_service
+            .remove_email_if_not_primary(id, email)
+            .await?;
+
+        Ok(())
+    }
+
+    /// POST `/me/emails/<email>/set-primary`
+    ///
+    /// Set the email as account's primary mail.
+    pub async fn set_primary_mail(
+        &self,
+        id: entity::AccountId,
+        new_primary_email: String,
+    ) -> HandlerResult<()> {
+        let Some(current_primary_email) = self.account_service.get_primary_email(id).await? else {
+            return Err(HandlerError::UnexceptedError("account with no email"));
+        };
+
+        if !self
+            .account_service
+            .is_email_taken_by(id, new_primary_email.clone())
+            .await?
+        {
+            return Err(ServiceError::EmailNotFound)?;
+        };
+
+        let set_primary_mail_jwt = self.token_service.sign(&Token::new(
+            id,
+            vec![TokenScope::SetPrimaryEmail {
+                current_primary_email: current_primary_email.clone(),
+                new_primary_email: new_primary_email.clone(),
+            }],
+            SET_PRIMARY_MAIL_VALID_FOR,
+        ));
+
+        let template = templated_mails::Template::SetPrimaryEmail {
+            current_primary_email,
+            new_primary_email,
+            set_primary_mail_jwt,
+            callback_url: self.email_callback_url,
+        };
+
+        self.email_client.send(id, template).await;
+
+        Ok(())
     }
 }
