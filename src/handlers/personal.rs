@@ -1,7 +1,7 @@
+use super::HandlerResult;
 use crate::{
     client::MailClient,
     dto, entity,
-    handlers::HandlerResult,
     service::{AccountService, TokenService},
 };
 use std::sync::Arc;
@@ -13,13 +13,13 @@ use std::sync::Arc;
 /// extracted from that token.
 ///
 /// [`TokenScope::Authenticate`]: crate::token::TokenScope::Authenticate
-pub struct AccountHandler {
+pub struct PersonalHandler {
     account_service: Arc<AccountService>,
     _token_service: Arc<TokenService>,
     _email_client: Arc<dyn MailClient>,
 }
 
-impl AccountHandler {
+impl PersonalHandler {
     /// Creates a new account hander.
     pub fn new(
         account_service: Arc<AccountService>,

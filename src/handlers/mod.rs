@@ -1,15 +1,15 @@
-mod account;
 mod authentication;
 mod authorization;
+mod personal;
 
 mod error;
 
 #[cfg(test)]
 mod tests;
 
-pub use account::AccountHandler;
 pub use authentication::AuthenticationHandler;
 pub use authorization::AuthorizationHandler;
+pub use personal::PersonalHandler;
 
 pub use error::HandlerError;
 

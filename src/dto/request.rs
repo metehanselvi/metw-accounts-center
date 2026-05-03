@@ -28,6 +28,7 @@ pub struct Signup {
 
 /// Login into the account.
 #[derive(Validate)]
+#[cfg_attr(test, derive(Clone))]
 pub struct LoginWithUsername {
     /// Username.
     #[validate(length(min = 2, max = 20), regex(path = *USERNAME_REGEX))]

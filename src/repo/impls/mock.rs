@@ -255,7 +255,12 @@ impl AccountRepoTransaction for MockAccountRepoTransactionImpl {
         }
     }
 
-    async fn add_username(&mut self, id: entity::AccountId, username: &str, is_primary: bool) -> RepoResult<()> {
+    async fn add_username(
+        &mut self,
+        id: entity::AccountId,
+        username: &str,
+        is_primary: bool,
+    ) -> RepoResult<()> {
         if self.state.usernames.contains_key(username) {
             Err(RepoError::Internal("username does not exists"))
         } else {

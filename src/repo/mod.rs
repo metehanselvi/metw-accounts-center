@@ -105,7 +105,12 @@ pub trait AccountRepoTransaction: Send + Sync {
 
     /// Add username alias to the account. Returns true if the operation
     /// succeed.
-    async fn add_username(&mut self, id: entity::AccountId, username: &str, is_primary: bool) -> RepoResult<()>;
+    async fn add_username(
+        &mut self,
+        id: entity::AccountId,
+        username: &str,
+        is_primary: bool,
+    ) -> RepoResult<()>;
 
     /// Set the verified flag of account.
     async fn set_verified_flag(

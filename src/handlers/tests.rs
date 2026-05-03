@@ -1,8 +1,8 @@
-use super::HandlerResult;
+use super::{AuthenticationHandler, HandlerError, HandlerResult, PersonalHandler};
 use crate::{
     client::impls::MockMailClientImpl,
     dto, entity,
-    handlers::{AccountHandler, AuthenticationHandler, HandlerError},
+    handlers::AuthorizationHandler,
     repo::impls::{MockAccountRepoImpl, MockTokenRepoImpl},
     service::{AccountService, ServiceError, TokenService},
     token::TokenScope,
@@ -19,6 +19,9 @@ async fn account_creation() -> HandlerResult<()> {
     let token_service = Arc::new(TokenService::new(token_repo, b"supersecret123"));
     let (emails, mail_client) = MockMailClientImpl::shared_new_with_emails();
 
+    let authorization_handler =
+        AuthorizationHandler::new(Arc::clone(&account_service), Arc::clone(&token_service));
+
     let authentication_handler = AuthenticationHandler::new(
         Arc::clone(&account_service),
         Arc::clone(&token_service),
@@ -26,32 +29,44 @@ async fn account_creation() -> HandlerResult<()> {
         "http://example.com",
     );
 
-    let account_handler = AccountHandler::new(
+    let personal_handler = PersonalHandler::new(
         Arc::clone(&account_service),
         Arc::clone(&token_service),
         Arc::clone(&mail_client),
     );
 
-    // Sign up an account.
-    let account_id = authentication_handler
-        .signup(dto::request::Signup {
-            username: "user".to_string(),
-            email: "user@example.com".to_string(),
-            password_hash: "passwd".to_string(),
-            keys: dto::request::Keys {
-                identity_key: vec![1],
-                encrypted_private_key: vec![2],
-                encrypted_master_key: vec![3],
-            },
-        })
-        .await?;
+    let signup_dto = dto::request::Signup {
+        username: "user".to_string(),
+        email: "user@example.com".to_string(),
+        password_hash: "passwd".to_string(),
+        keys: dto::request::Keys {
+            identity_key: vec![1],
+            encrypted_private_key: vec![2],
+            encrypted_master_key: vec![3],
+        },
+    };
 
-    account_handler.me(account_id).await?;
+    let login_dto = dto::request::LoginWithUsername {
+        username: "user".to_string(),
+        password_hash: "passwd".to_string(),
+    };
+
+    // Sign up an account.
+    let account_id = authentication_handler.signup(signup_dto).await?;
+
+    personal_handler.me(account_id).await?;
 
     // Try to get non-existent user.
     assert!(matches!(
-        account_handler.me(entity::AccountId(0)).await,
+        personal_handler.me(entity::AccountId(0)).await,
         Err(..)
+    ));
+
+    assert!(matches!(
+        authentication_handler
+            .login_by_username(login_dto.clone())
+            .await,
+        Err(HandlerError::Service(ServiceError::AccountNotVerified))
     ));
 
     // Check sent verification mail.
@@ -67,33 +82,18 @@ async fn account_creation() -> HandlerResult<()> {
         assert!(username == "user");
 
         let signup_token = token_service.verify(signup_jwt).await?;
+
+        // Now the account is verified and we can log into it.
+        authorization_handler.auth(signup_jwt.clone()).await?;
+
         assert!(signup_token.id == account_id);
         assert!(matches!(signup_token.scopes[0], TokenScope::Signup { .. }));
     }
 
-    assert!(matches!(
-        authentication_handler
-            .login_by_username(dto::request::LoginWithUsername {
-                username: "user".to_string(),
-                password_hash: "passwd".to_string(),
-            })
-            .await,
-        Err(HandlerError::Service(ServiceError::AccountNotVerified))
-    ));
-
-    /* TODO: add account verification
     // Try to log in with username & password.
     token_service
-        .verify(
-            &authentication_handler
-                .login_by_username(dto::request::LoginWithUsername {
-                    username: "user".to_string(),
-                    password_hash: "passwd".to_string(),
-                })
-                .await?,
-        )
+        .verify(&authentication_handler.login_by_username(login_dto).await?)
         .await?;
-    */
 
     Ok(())
 }

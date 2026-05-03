@@ -1,7 +1,7 @@
+use super::HandlerResult;
 use crate::{
     client::MailClient,
     dto, entity,
-    handlers::HandlerResult,
     service::{AccountService, TokenService},
     token::{Token, TokenScope},
     util::templated_mails,
