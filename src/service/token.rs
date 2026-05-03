@@ -63,7 +63,7 @@ impl TokenService {
     }
 
     /// Revoke the token
-    pub async fn revoke(&self, base64_encoded_token: &str) -> ServiceResult<()> {
+    pub async fn revoke(&self, base64_encoded_token: &str) -> ServiceResult<Token> {
         let token = self.verify(base64_encoded_token).await?;
 
         let now = Utc::now().timestamp() as u64;
@@ -78,6 +78,6 @@ impl TokenService {
             .revoke(signature.as_bytes(), Duration::from_secs(duration))
             .await?;
 
-        Ok(())
+        Ok(token)
     }
 }

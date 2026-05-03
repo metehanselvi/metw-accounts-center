@@ -1,4 +1,4 @@
-use super::HandlerResult;
+use super::{HandlerError, HandlerResult};
 use crate::{
     client::MailClient,
     dto, entity,

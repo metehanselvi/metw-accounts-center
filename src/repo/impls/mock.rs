@@ -111,9 +111,9 @@ impl AccountRepo for MockAccountRepoImpl {
 
         let mut secondary_emails = Vec::new();
 
-        for email_entity in state.usernames.values() {
+        for email_entity in state.emails.values() {
             if email_entity.account_id == id {
-                secondary_emails.push(email_entity.username.clone());
+                secondary_emails.push(email_entity.email.clone());
             }
         }
 
@@ -221,10 +221,9 @@ impl AccountRepo for MockAccountRepoImpl {
     async fn is_email_taken_by(&self, id: entity::AccountId, email: &str) -> RepoResult<bool> {
         let state = self.lock_state().await;
 
-        let email_entity = state
-            .emails
-            .get(email)
-            .ok_or(RepoError::Internal("email not found"))?;
+        let Some(email_entity) = state.emails.get(email) else {
+            return Ok(false);
+        };
 
         Ok(email_entity.account_id == id)
     }

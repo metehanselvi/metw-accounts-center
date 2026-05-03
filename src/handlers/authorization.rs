@@ -45,9 +45,7 @@ impl AuthorizationHandler {
 
     /// Handle privileged tokens.
     pub async fn auth(&self, base64_encoded_token: String) -> HandlerResult<()> {
-        let token = self.token_service.verify(&base64_encoded_token).await?;
-
-        self.token_service.revoke(&base64_encoded_token).await?;
+        let token = self.token_service.revoke(&base64_encoded_token).await?;
 
         for scope in token.scopes {
             self.handle_token(token.id, scope).await?;

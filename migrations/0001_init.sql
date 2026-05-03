@@ -9,7 +9,7 @@ CREATE TABLE accounts
     encrypted_private_key bytea NOT NULL,
     encrypted_master_key bytea NOT NULL,
 
-    CONSTRAINT account_id_pkey
+    CONSTRAINT accounts_id_pkey
         PRIMARY KEY (id)
 );
 
@@ -20,6 +20,9 @@ CREATE TABLE account_flags
 (
     id bigint NOT NULL,
     is_verified bool NOT NULL,
+
+    CONSTRAINT account_flags_id_pkey
+        PRIMARY KEY (id),
 
     CONSTRAINT account_flags_id_fk
         FOREIGN KEY (id) REFERENCES accounts (id)
