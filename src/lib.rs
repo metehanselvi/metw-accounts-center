@@ -21,6 +21,9 @@ pub mod util;
 /// Authentication: JWT & token scopes.
 pub mod token;
 
+/// External integration.
+pub mod client;
+
 mod snowflake;
 
 pub use snowflake::{EPOCH, snowflake};

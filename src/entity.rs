@@ -6,6 +6,12 @@ use sqlx::prelude::FromRow;
 #[derive(Serialize, Deserialize, FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub struct AccountId(pub i64);
 
+impl std::fmt::Display for AccountId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 /// Account entity.
 ///
 /// This type mainly used for storing cryptographic primitives.
