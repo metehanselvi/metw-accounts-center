@@ -1,6 +1,10 @@
 use super::HandlerResult;
 use crate::{
-    client::MailClient, dto, entity, handlers::HandlerError, service::{AccountService, ServiceError, TokenService}, token::{Token, TokenScope}, util::templated_mails
+    client::MailClient,
+    dto, entity,
+    service::{AccountService, ServiceError, TokenService},
+    token::{Token, TokenScope},
+    util::templated_mails,
 };
 use std::{sync::Arc, time::Duration};
 
