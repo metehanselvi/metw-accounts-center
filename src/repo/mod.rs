@@ -13,7 +13,7 @@ pub type RepoResult<T> = Result<T, RepoError>;
 
 /// Persistent account storage.
 #[async_trait]
-pub trait AccountRepo {
+pub trait AccountRepo: Send + Sync {
     /// Begin a new transactional unit.
     async fn begin_transaction(&self) -> RepoResult<Box<dyn AccountRepoTransaction>>;
 
@@ -60,7 +60,7 @@ pub trait AccountRepo {
 
 /// Transactional repository access wrapper.
 #[async_trait]
-pub trait AccountRepoTransaction {
+pub trait AccountRepoTransaction: Send + Sync {
     /// Commit the changes.
     async fn commit(self: Box<Self>) -> RepoResult<()>;
 
@@ -106,7 +106,7 @@ pub trait AccountRepoTransaction {
 
 /// Token provider holds data temporarily.
 #[async_trait]
-pub trait TokenRepo {
+pub trait TokenRepo: Send + Sync {
     /// Revoke the token with provided fingerprint. Keep the fingerprint for
     /// at least `revoke_for` time.
     async fn revoke(&self, fingerprint: &[u8], revoke_for: std::time::Duration) -> RepoResult<()>;

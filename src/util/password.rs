@@ -4,7 +4,7 @@ use argon2::{
 };
 
 /// Argon2-hashed password.
-pub async fn check_password(password: String, hash: String) -> bool {
+pub async fn check(password: String, hash: String) -> bool {
     tokio::task::spawn_blocking(move || {
         let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&hash) {
             parsed_hash
@@ -21,7 +21,7 @@ pub async fn check_password(password: String, hash: String) -> bool {
 }
 
 /// Do Argon2 hasing on the password.
-pub async fn hash_password(password: String) -> String {
+pub async fn hash(password: String) -> String {
     tokio::task::spawn_blocking(move || {
         let salt = SaltString::generate(&mut OsRng);
 
@@ -41,12 +41,12 @@ pub async fn hash_password(password: String) -> String {
 async fn test_hash() {
     let password = "very_very_strong_password";
 
-    let hash = hash_password(password.to_string()).await;
+    let hash = hash(password.to_string()).await;
 
-    assert!(check_password(password.to_string(), hash).await);
+    assert!(check(password.to_string(), hash).await);
 
     assert!(
-        !check_password(
+        !check(
             password.to_string(),
             "tring_to_attack_with_inalid_hash_string".to_string()
         )

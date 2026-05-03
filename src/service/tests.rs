@@ -4,7 +4,7 @@ use crate::{
     repo::impls::{MockAccountRepoImpl, MockTokenRepoImpl},
     service::{ServiceError, TokenService},
     token::{Token, TokenScope},
-    util::check_password,
+    util::password,
 };
 use std::time::Duration;
 
@@ -85,7 +85,7 @@ async fn account_creation_mock_mt() -> ServiceResult<()> {
     // Validate account creation.
     assert!(repo.get_primary_username(user1_account_id).await?.unwrap() == "user1");
     assert!(
-        check_password(
+        password::check(
             "paswd1".to_string(),
             repo.get_login_by_username("user1")
                 .await?

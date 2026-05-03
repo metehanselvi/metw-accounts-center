@@ -12,6 +12,9 @@ pub mod repo;
 /// Application state.
 pub mod service;
 
+/// Request handlers.
+pub mod handlers;
+
 /// Data transfer objects.
 pub mod dto;
 
@@ -23,7 +26,3 @@ pub mod token;
 
 /// External integration.
 pub mod client;
-
-mod snowflake;
-
-pub use snowflake::{EPOCH, snowflake};

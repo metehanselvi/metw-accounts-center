@@ -2,8 +2,7 @@ use super::{ServiceError, ServiceResult};
 use crate::{
     dto, entity,
     repo::AccountRepo,
-    snowflake,
-    util::{check_password, hash_password},
+    util::{password, snowflake},
 };
 
 /// Account state.
@@ -22,7 +21,7 @@ impl AccountService {
         &self,
         signup_dto: dto::request::Signup,
     ) -> ServiceResult<entity::AccountId> {
-        let password_hash = hash_password(signup_dto.password_hash).await;
+        let password_hash = password::hash(signup_dto.password_hash).await;
 
         let mut transaction = self.repo.begin_transaction().await?;
 
@@ -67,7 +66,7 @@ impl AccountService {
             return Err(ServiceError::InvalidCredentials);
         };
 
-        if check_password(credentials.password_hash, login.password_hash).await {
+        if password::check(credentials.password_hash, login.password_hash).await {
             Ok(login.id)
         } else {
             Err(ServiceError::InvalidCredentials)
@@ -89,7 +88,7 @@ impl AccountService {
             return Err(ServiceError::InvalidCredentials);
         };
 
-        if check_password(credentials.password_hash, login.password_hash).await {
+        if password::check(credentials.password_hash, login.password_hash).await {
             Ok(login.id)
         } else {
             Err(ServiceError::InvalidCredentials)

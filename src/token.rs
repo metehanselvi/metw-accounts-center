@@ -19,15 +19,21 @@ pub struct Token {
 /// Authorization scopes.
 #[derive(Serialize, Deserialize)]
 pub enum TokenScope {
-    /// Permit adding the email to the account.
-    AddEmail(String),
     /// Permit logins.
     Authenticate,
-    /// Allow changing aaccount's primary email address to given address.
+
+    /// Permit adding the email to the account.
+    AddEmail(String),
+    /// Allow changing account's primary email address to given address.
     SetPrimaryEmail(String),
-    /// Enable account. This scope is present in email sent in signup
-    /// procedure.
-    EnableAccount,
+    /// Enable account and add first primary email. This scope is present in
+    /// email sent in signup procedure.
+    ///
+    /// This variant is not a tuple for future extensions.
+    Signup {
+        /// Primary email added to the account.
+        email: String,
+    },
 }
 
 impl Token {
