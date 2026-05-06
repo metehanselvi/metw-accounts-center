@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-/// Repository access data transfer objects.
+/// Repository access.
 pub mod repo;
 
 /// Requests from client, validated by `validator`.

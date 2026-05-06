@@ -7,6 +7,6 @@ pub mod impls;
 /// Send emails.
 #[async_trait]
 pub trait MailClient {
-    /// Send mail.
+    /// Send emails.
     async fn send(&self, id: entity::AccountId, template: templated_mails::Template);
 }

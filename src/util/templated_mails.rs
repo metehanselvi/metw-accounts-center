@@ -1,8 +1,8 @@
 /// Mail templates.
 ///
-/// See [`TokenScopes`].
+/// See [`TokenScope`].
 ///
-/// [`TokenScopes`]: `crate::TokenScopes`
+/// [`TokenScope`]: `crate::token::TokenScope`
 #[allow(missing_docs)]
 #[cfg_attr(test, derive(Clone))]
 pub enum Template {
@@ -31,7 +31,7 @@ impl Template {
     pub fn subject(&self) -> String {
         match self {
             Self::Signup { .. } => "Verify your metw.cc account".to_string(),
-            Self::AddEmail { .. } => "Verify your email to add your metw.cc account".to_string(),
+            Self::AddEmail { .. } => "Add email to your metw.cc account".to_string(),
             Self::SetPrimaryEmail { .. } => "Confirm primary mail change".to_string(),
         }
     }

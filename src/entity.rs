@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
-/// Account id
+/// Account ID.
 #[derive(Debug, Serialize, Deserialize, FromRow, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub struct AccountId(pub i64);
 
@@ -17,7 +17,7 @@ impl std::fmt::Display for AccountId {
 /// This type mainly used for storing cryptographic primitives.
 #[derive(Debug, FromRow, Default)]
 pub struct Account {
-    /// Account id generated using Twitter's snowflake algorithm.
+    /// Account ID generated using Twitter's snowflake algorithm.
     pub id: AccountId,
 
     /// Argon2 hashed password.
@@ -49,13 +49,13 @@ pub struct Username {
     /// Username.
     pub username: String,
 
-    /// Account have the username.
+    /// Account the username belongs to.
     pub account_id: AccountId,
 
     /// Whether or not the username is account's primary username.
     pub is_primary: bool,
 
-    /// Timestamp the username taken at.
+    /// Timestamp the username was taken.
     pub created_at: DateTime<Utc>,
 
     /// Timestamp the username expires at.
@@ -68,12 +68,12 @@ pub struct Email {
     /// Email.
     pub email: String,
 
-    /// Account have the username.
+    /// Account the email belongs to.
     pub account_id: AccountId,
 
     /// Whether or not the email is primary mail of the account.
     pub is_primary: bool,
 
-    /// Timestamp the username expires at.
+    /// Timestamp the email was added at.
     pub created_at: DateTime<Utc>,
 }

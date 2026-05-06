@@ -49,9 +49,9 @@ pub trait AccountRepo: Send + Sync {
     /// or deleted accounts do not.
     async fn get_primary_email(&self, id: entity::AccountId) -> RepoResult<Option<String>>;
 
-    /// Get secondary by account id.
+    /// Get secondary emails by account id.
     ///
-    /// List of secondary emails if user add.
+    /// Returns an empty list if none have been added.
     async fn get_secondary_emails(&self, id: entity::AccountId) -> RepoResult<Vec<String>>;
 
     /// Get account keys - the key bundle of the account.
@@ -67,8 +67,9 @@ pub trait AccountRepo: Send + Sync {
     ///
     /// Although `email`s are unique, the `id` parameter is also required to
     /// prevent race conditions. It is highly unlikely that the owner of an
-    /// email would change at the exact moment the one's email is set as the
-    /// primary key, but it is still an unsafety that must still be prevented.
+    /// email would change at the exact moment their email is being set as
+    /// the primary email, but it is still a safety hazard that must still be
+    /// prevented.
     async fn set_primary_email_if_current_is(
         &self,
         id: entity::AccountId,
@@ -110,8 +111,7 @@ pub trait AccountRepoTransaction: Send + Sync {
     /// Load default flags to user.
     async fn insert_default_flags(&mut self, id: entity::AccountId) -> RepoResult<()>;
 
-    /// Add a secondary email to the account. Returns true if the operation
-    /// succeed.
+    /// Add a secondary email to the account.
     async fn add_email(
         &mut self,
         id: entity::AccountId,
@@ -119,8 +119,7 @@ pub trait AccountRepoTransaction: Send + Sync {
         is_primary: bool,
     ) -> RepoResult<()>;
 
-    /// Add username alias to the account. Returns true if the operation
-    /// succeed.
+    /// Add username alias to the account.
     async fn add_username(
         &mut self,
         id: entity::AccountId,

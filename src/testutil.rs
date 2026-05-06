@@ -78,14 +78,14 @@ impl TestCtx {
         Self::default()
     }
 
-    /// Creates an random account.
+    /// Creates a random account.
     ///
     /// Returns `(id, username, email)`
     pub async fn signup(
         &self,
         password_hash: &'static str,
     ) -> (entity::AccountId, &'static str, &'static str) {
-        let username = random_email();
+        let username = random_username();
         let email = random_email();
 
         let account_id = self
@@ -100,7 +100,8 @@ impl TestCtx {
                     encrypted_master_key: vec![3],
                 },
             })
-            .await.unwrap();
+            .await
+            .unwrap();
 
         (account_id, username, email)
     }
