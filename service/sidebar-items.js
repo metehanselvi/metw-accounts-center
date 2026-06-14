@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["client","dto","entity","handlers","repo","service","testutil","util"],"struct":["State"]};

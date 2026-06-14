@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["service",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/cmp/trait.Eq.html\" title=\"trait core::cmp::Eq\">Eq</a> for <a class=\"struct\" href=\"service/dto/repo/struct.Keys.html\" title=\"struct service::dto::repo::Keys\">Keys</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/cmp/trait.Eq.html\" title=\"trait core::cmp::Eq\">Eq</a> for <a class=\"struct\" href=\"service/util/id/struct.AccountId.html\" title=\"struct service::util::id::AccountId\">AccountId</a>",0]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[526]}
