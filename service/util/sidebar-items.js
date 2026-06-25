@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["id","mails","password","token"],"struct":["JsonWebSignature"]};
+window.SIDEBAR_ITEMS = {"mod":["emails","id","password","token"],"struct":["JsonWebSignature"]};

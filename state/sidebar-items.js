@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["AccountRepoImpl","CaptchaClientImpl","Config","MailClientImpl","TokenRepoImpl"]};
+window.SIDEBAR_ITEMS = {"struct":["AccountRepoImpl","CaptchaClientImpl","Config","EmailClientImpl","EmailLimitingRepoImpl","TokenRepoImpl"]};

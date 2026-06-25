@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["mock"],"trait":["CaptchaClient","MailClient"]};
+window.SIDEBAR_ITEMS = {"mod":["mock"],"trait":["CaptchaClient","EmailClient"]};

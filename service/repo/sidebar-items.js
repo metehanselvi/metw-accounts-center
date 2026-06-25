@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["RepoError"],"mod":["mock"],"trait":["AccountRepo","AccountRepoTransaction","TokenRepo"],"type":["RepoResult"]};
+window.SIDEBAR_ITEMS = {"enum":["RepoError"],"mod":["mock"],"trait":["AccountRepo","AccountRepoTransaction","EmailLimitingRepo","TokenRepo"],"type":["RepoResult"]};
